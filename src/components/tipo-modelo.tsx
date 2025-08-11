@@ -1,4 +1,3 @@
-import { selectType, stepType } from "@/app/page";
 import { modelo } from "@/constants/modelo";
 import { template } from "@/constants/template";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -6,6 +5,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { toast } from "sonner";
+import { selectType, stepType } from "@/app/type";
 
 type PropsType = {
   next: stepType;
