@@ -1,25 +1,33 @@
 "use client";
 
 import SelecionarModelo from "@/components/modelo";
+import Selection from "@/components/selection";
 import TipoModeloSelecionado from "@/components/tipo-modelo";
-import { modelo } from "@/constants/modelo";
-import { useCallback, useState } from "react";
-
-export type stepType = "modelo" | "tipo" | "preview";
-export type selectType = {
-  modelo: keyof typeof modelo | null;
-  template: number | null;
-};
+import { useCallback, useEffect, useState } from "react";
+import { fetchData } from "./action";
+import { newsType, selectType, stepType } from "./type";
+import Cropping from "@/components/cropping";
+import Preview from "@/components/preview";
 
 export default function Home() {
   const [step, setStep] = useState<stepType>("modelo");
+  const [news, setNews] = useState<newsType[]>();
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [select, setSelect] = useState<selectType>({
     modelo: null,
     template: null,
+    news: null,
   });
 
   const onChangeStep = useCallback((step: stepType) => {
     setStep(step);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetchData();
+      setNews(res);
+    })();
   }, []);
 
   return (
@@ -34,10 +42,37 @@ export default function Home() {
       )}
       {step === "tipo" && select.modelo && (
         <TipoModeloSelecionado
-          next="preview"
+          next="selection"
           previus="modelo"
           select={select}
           setSelect={setSelect}
+          onChangeStep={onChangeStep}
+        />
+      )}
+      {step === "selection" && select.modelo && (
+        <Selection
+          news={news}
+          next="crop"
+          previus="tipo"
+          select={select}
+          setSelect={setSelect}
+          onChangeStep={onChangeStep}
+        />
+      )}
+      {step === "crop" && select.modelo && (
+        <Cropping
+          next="preview"
+          previous="selection"
+          select={select}
+          onChangeStep={onChangeStep}
+          setCroppedImage={setCroppedImage}
+        />
+      )}
+      {step === "preview" && select.modelo && (
+        <Preview
+          previous="crop"
+          select={select}
+          croppedImage={croppedImage!}
           onChangeStep={onChangeStep}
         />
       )}

@@ -1,12 +1,12 @@
 "use client";
 
-import { selectType, stepType } from "@/app/page";
 import { modelo } from "@/constants/modelo";
 import { ChevronRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { selectType, stepType } from "@/app/type";
 
 type PropsType = {
   next: stepType;
