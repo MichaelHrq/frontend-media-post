@@ -10,6 +10,7 @@ export const fetchData = async () => {
       if (!res.ok) {
         throw new Error(`Erro na API! Status: ${res.status}`);
       }
+      console.log(res.headers);
       const data = await res.json();
       if (!Array.isArray(data)) {
         console.error("O dado recebido da API não é um array.", data);

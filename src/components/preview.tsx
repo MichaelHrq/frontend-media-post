@@ -104,14 +104,13 @@ export default function Preview({
       <div className="mt-8 w-full flex justify-center gap-4">
         <Button
           onClick={previousChangeStep}
-          variant="outline"
-          className="flex items-center gap-2"
+          className="bg-gradient-to-br from-blue-500 to-cyan-600"
         >
           <ChevronLeft size={18} /> Voltar
         </Button>
         <Button
           onClick={downloadMergedImage}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          className="bg-gradient-to-br from-blue-500 to-cyan-600"
         >
           Baixar Imagem <Download size={18} />
         </Button>

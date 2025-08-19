@@ -10,6 +10,7 @@ import {
 import Cropper, { Area, Point } from "react-easy-crop";
 import { Button } from "./ui/button";
 import { ChevronLeft, Scissors } from "lucide-react";
+import Loading from "./loading";
 
 interface CroppingProps {
   next: stepType;
@@ -22,19 +23,21 @@ interface CroppingProps {
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.addEventListener("load", () => resolve(image));
-    image.addEventListener("error", (error) => reject(error));
-    image.setAttribute("crossOrigin", "anonymous");
+    image.crossOrigin = "anonymous"; // ainda deixamos por garantia
+    image.onload = () => resolve(image);
+    image.onerror = (error) => reject(error);
     image.src = url;
   });
 
-async function getCroppedImg(
+export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: Area,
   config: configType
 ): Promise<string | null> {
-  const image = await createImage(imageSrc);
+  // 🔑 Usa o proxy do Next.js
+  const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(imageSrc)}`;
+
+  const image = await createImage(proxiedUrl);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -65,7 +68,7 @@ async function getCroppedImg(
           reject(new Error("Falha ao criar o blob da imagem."));
           return;
         }
-        resolve(window.URL.createObjectURL(blob));
+        resolve(URL.createObjectURL(blob));
       },
       "image/jpeg",
       0.95
@@ -82,6 +85,7 @@ export default function Cropping({
 }: CroppingProps) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const { config, newsData } = useMemo(() => {
@@ -106,6 +110,7 @@ export default function Cropping({
   );
 
   const applyCrop = useCallback(async () => {
+    setLoading(true);
     if (!croppedAreaPixels || !newsData?.image || !config) {
       console.warn("Dados necessários para o corte não estão disponíveis.");
       return;
@@ -117,6 +122,7 @@ export default function Cropping({
         config
       );
       setCroppedImage(croppedImageUrl);
+      setLoading(false);
       onChangeStep(next);
     } catch (e) {
       console.error("Erro ao aplicar o corte:", e);
@@ -173,16 +179,24 @@ export default function Cropping({
         <div className="mt-4 w-full flex justify-center gap-4">
           <Button
             onClick={previusChangeStep}
+            disabled={loading}
             className="bg-gradient-to-br from-blue-500 to-cyan-600"
           >
             <ChevronLeft /> Voltar
           </Button>
-          <Button
-            onClick={applyCrop}
-            className="bg-gradient-to-br from-blue-500 to-cyan-600"
-          >
-            Cortar <Scissors />
-          </Button>
+          {!loading && (
+            <Button
+              onClick={applyCrop}
+              className="bg-gradient-to-br from-blue-500 to-cyan-600"
+            >
+              Cortar <Scissors />
+            </Button>
+          )}
+          {loading && (
+            <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
+              <Loading />
+            </Button>
+          )}
         </div>
       </div>
     </div>
