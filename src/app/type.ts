@@ -23,9 +23,7 @@ export type pixelCropType = {
 };
 
 export type configType = {
-  aspect: number;
-  height: number;
-  overlayPath: string;
   title: string;
   width: number;
+  height: number;
 };
