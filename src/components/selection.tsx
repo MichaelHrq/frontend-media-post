@@ -9,8 +9,9 @@ import {
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDownIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
+import Loading from "./loading";
 
 type PropsType = {
   next: stepType;
@@ -44,22 +45,41 @@ export default function Selection({
       </h2>
       <Card>
         <CardContent>
-          <Select
-            onValueChange={(value) =>
-              setSelect((curr) => ({ ...curr, news: value }))
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione uma matéria" />
-            </SelectTrigger>
-            <SelectContent>
-              {news?.map((item) => (
-                <SelectItem key={item.id} value={JSON.stringify(item)}>
-                  {item.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {news ? (
+            <Select
+              onValueChange={(value) =>
+                setSelect((curr) => ({ ...curr, news: value }))
+              }
+              value={select.news}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione uma matéria" />
+              </SelectTrigger>
+              <SelectContent
+                className="w-[var(--radix-popper-anchor-width)]"
+                position="popper"
+                sideOffset={5}
+              >
+                {news.map((item) => (
+                  <SelectItem
+                    key={item.id}
+                    value={JSON.stringify(item)}
+                    className="whitespace-normal break-words text-wrap"
+                  >
+                    {item.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="border-input border rounded-md relative px-3 py-2 h-9 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Buscando matérias...
+              </span>
+              <Loading variant="black" className="size-7 absolute left-1/2 " />
+              <ChevronDownIcon className="size-4 opacity-40" />
+            </div>
+          )}
         </CardContent>
       </Card>
       <div className="mt-4 w-full flex justify-center gap-4">

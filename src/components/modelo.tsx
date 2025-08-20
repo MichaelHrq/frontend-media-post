@@ -54,7 +54,8 @@ export default function SelecionarModelo({
                 <p className="font-semibold text-gray-800">{value.title}</p>
               </div>
               <div
-                className={`self-center h-20 rounded-md bg-gradient-to-br from-blue-500 to-cyan-600 aspect-[${value.aspect}]`}
+                className={`self-center h-20 rounded-md bg-gradient-to-br from-blue-500 to-cyan-600`}
+                style={{ aspectRatio: value.width/value.height }}
               />
               <div className="text-center">
                 <p className="text-sm text-gray-500">{`${value.width}x${value.height}`}</p>

@@ -2,7 +2,7 @@
 
 import SelecionarModelo from "@/components/modelo";
 import Selection from "@/components/selection";
-import TipoModeloSelecionado from "@/components/tipo-modelo";
+import Template from "@/components/template";
 import { useCallback, useEffect, useState } from "react";
 import { fetchData } from "./action";
 import { newsType, selectType, stepType } from "./type";
@@ -16,7 +16,7 @@ export default function Home() {
   const [select, setSelect] = useState<selectType>({
     modelo: null,
     template: null,
-    news: null,
+    news: undefined,
   });
 
   const onChangeStep = useCallback((step: stepType) => {
@@ -41,7 +41,7 @@ export default function Home() {
         />
       )}
       {step === "tipo" && select.modelo && (
-        <TipoModeloSelecionado
+        <Template
           next="selection"
           previus="modelo"
           select={select}

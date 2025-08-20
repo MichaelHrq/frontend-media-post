@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { newsType, selectType, stepType } from "@/app/type";
 import { modelo } from "@/constants/modelo";
-import html2canvas from 'html2canvas-pro';
+import html2canvas from "html2canvas-pro";
 import { ChevronLeft, Download } from "lucide-react";
 import { useMemo, useRef } from "react";
 import { Button } from "./ui/button";
@@ -50,7 +50,7 @@ export default function Preview({
       useCORS: true,
       scale: scale,
       // Fundo transparente para que o backgroundImage do div seja capturado
-      backgroundColor: null, 
+      backgroundColor: null,
     });
 
     const link = document.createElement("a");
@@ -82,22 +82,34 @@ export default function Preview({
             backgroundImage: `url(${croppedImage})`,
             aspectRatio: `${config.width} / ${config.height}`,
             // Adicione esta linha para resolver o problema de herança
-            backgroundColor: 'transparent',
+            backgroundColor: "transparent",
           }}
         >
           <img
-            src="/overlay/feed.png"
+            src={select.template!}
             alt="Moldura do post"
             className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
           />
-          <div className="absolute top-[70%] left-[5%] w-[90%] z-20 p-0 text-left">
-            {newsData.title && (
+
+          {newsData.chapeu && (
+            <div className="absolute top-[77.3%] left-[6%] z-20 p-0 w-[156px] h-[21px] flex items-center justify-center">
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: newsData.chapeu.toUpperCase(),
+                }}
+                className="m-0 text-[8px] mt-[2px] sm:text-xs text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+              />
+            </div>
+          )}
+
+          {newsData.title && (
+            <div className="absolute top-[82%] left-[2.5%] z-20 p-0 w-[95%] text-left">
               <h2
                 dangerouslySetInnerHTML={{ __html: newsData.title }}
-                className="font-bold text-2xl text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                className="font-bold text-sm sm:text-2xl text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 

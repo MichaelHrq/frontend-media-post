@@ -1,11 +1,12 @@
-import { modelo } from "@/constants/modelo";
+/* eslint-disable @next/next/no-img-element */
+
+import { selectType, stepType } from "@/app/type";
 import { template } from "@/constants/template";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import { toast } from "sonner";
-import { selectType, stepType } from "@/app/type";
 
 type PropsType = {
   next: stepType;
@@ -15,7 +16,7 @@ type PropsType = {
   setSelect: Dispatch<SetStateAction<selectType>>;
 };
 
-export default function TipoModeloselect({
+export default function Template({
   next,
   select,
   previus,
@@ -31,7 +32,9 @@ export default function TipoModeloselect({
     onChangeStep(next);
   }
 
-  const model = modelo[select.modelo!];
+  console.log(select)
+
+  const templates = template[select.modelo!]
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -40,35 +43,27 @@ export default function TipoModeloselect({
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {template.map((item) => (
+        {templates.map((item) => (
           <Card
-            key={item.key}
+            key={item}
             onClick={() =>
               setSelect((cur) => ({
                 ...cur,
-                template: item.key,
+                template: item,
               }))
             }
             className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-              select.template === item.key
+              select.template === item
                 ? "ring-2 ring-blue-500 shadow-lg bg-blue-50"
                 : "hover:shadow-md"
             }`}
           >
             <CardContent className="flex justify-center">
-              <div
-                className={`p-2 border-2 h-60 aspect-[${model.aspect}] flex flex-col justify-between`}
-              >
-                <div
-                  className={`text-${item.logoPosition} w-full text-blue-500`}
-                >
-                  Logo
-                </div>
-                <div className="w-full">
-                  <div className="h-4 w-full mb-1 rounded-xs bg-gradient-to-br from-blue-500 to-cyan-600"></div>
-                  <div className="h-4 w-2/3 rounded-xs  bg-gradient-to-br from-blue-500 to-cyan-600"></div>
-                </div>
-              </div>
+              <img
+                src={item}
+                alt="Template"
+                className="w-full h-56 object-contain"
+              />
             </CardContent>
           </Card>
         ))}

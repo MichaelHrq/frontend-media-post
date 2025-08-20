@@ -10,7 +10,6 @@ export const fetchData = async () => {
       if (!res.ok) {
         throw new Error(`Erro na API! Status: ${res.status}`);
       }
-      console.log(res.headers);
       const data = await res.json();
       if (!Array.isArray(data)) {
         console.error("O dado recebido da API não é um array.", data);
@@ -20,14 +19,17 @@ export const fetchData = async () => {
         const imageUrl = item?._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
         const postTitle = item?.title?.rendered;
         const postId = item?.id;
+        const chapeu = item?.acf?.chapeu;
+        const categoria = item?._embedded?.["wp:term"]?.[0]?.[0]?.name;
         if (imageUrl && postTitle && postId) {
           cur.push({
             id: postId,
             title: postTitle,
             image: imageUrl,
+            chapeu: chapeu?.length ? chapeu : categoria.length ? categoria : '',
           });
-        }
-        return cur;
+        } 
+        return cur
       }, []);
       return filter as newsType[];
     } catch (error) {

@@ -1,12 +1,22 @@
 import Image from "next/image";
 
-export default function Loading() {
+type PropsType = {
+  variant?: "black" | "white";
+} & Omit<React.ComponentProps<typeof Image>, "src" | "alt">;
+
+export default function Loading({
+  variant = "white",
+  height = 30,
+  width = 30,
+  ...rest
+}: PropsType) {
   return (
     <Image
-      src="\loading\tube-spinner.svg"
+      src={`/loading/spinner-${variant}.svg`}
       alt="Loading"
-      width="30"
-      height="30"
+      width={width}
+      height={height}
+      {...rest}
     />
   );
 }

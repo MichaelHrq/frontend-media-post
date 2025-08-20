@@ -5,11 +5,6 @@ const config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  safelist: [
-    'aspect-[1]',
-    'aspect-[0.8]',
-    'aspect-[0.5625]',
-  ],
   theme: {
     extend: {
       backgroundImage: {
