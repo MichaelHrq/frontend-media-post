@@ -9,7 +9,7 @@ export const emtempoTemplate = {
           p: "font-montserrat mt-[2px] text-sm text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]",
         },
         title: {
-          div: "absolute top-[82%] left-[6%] z-20 p-0 w-[94%] text-left",
+          div: "absolute top-[82%] left-[6%] z-20 p-0 w-[92%] text-left",
           h2: "font-bold font-montserrat text-2xl text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]",
         },
       },
