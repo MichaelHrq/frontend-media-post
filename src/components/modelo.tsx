@@ -1,25 +1,26 @@
 "use client";
 
-import { modelo } from "@/constants/modelo";
 import { ChevronRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import { selectType, stepType } from "@/app/type";
+import { configType, selectType, stepType } from "@/app/type";
 
 type PropsType = {
   next: stepType;
   select: selectType;
+  model: configType[];
   onChangeStep: (step: stepType) => void;
   setSelect: Dispatch<SetStateAction<selectType>>;
 };
 
-export default function SelecionarModelo({
+export default function ModelSelect({
   next,
+  model,
   select,
-  onChangeStep,
   setSelect,
+  onChangeStep,
 }: PropsType) {
   const changeStep = () => {
     if (!select.modelo)
@@ -33,46 +34,54 @@ export default function SelecionarModelo({
         Selecione um Modelo
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {Object.entries(modelo).map(([key, value]) => (
-          <Card
-            key={key}
-            onClick={() =>
-              setSelect((cur) => ({
-                ...cur,
-                modelo: key as keyof typeof modelo,
-              }))
-            }
-            className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-              select.modelo === key
-                ? "ring-2 ring-blue-500 shadow-lg bg-blue-50"
-                : "hover:shadow-md"
-            }`}
-          >
-            <CardContent className="flex flex-col gap-2">
-              <div className="text-center">
-                <p className="font-semibold text-gray-800">{value.title}</p>
-              </div>
-              <div
-                className={`self-center h-20 rounded-md bg-gradient-to-br from-blue-500 to-cyan-600`}
-                style={{ aspectRatio: value.width/value.height }}
-              />
-              <div className="text-center">
-                <p className="text-sm text-gray-500">{`${value.width}x${value.height}`}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {model.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {model.map((item) => (
+              <Card
+                key={item.id}
+                onClick={() =>
+                  setSelect((cur) => ({
+                    ...cur,
+                    modelo: item,
+                  }))
+                }
+                className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                  select.modelo?.id === item.id
+                    ? "ring-2 ring-blue-500 shadow-lg bg-blue-50"
+                    : "hover:shadow-md"
+                }`}
+              >
+                <CardContent className="flex flex-col gap-2">
+                  <div className="text-center">
+                    <p className="font-semibold text-gray-800">{item.title}</p>
+                  </div>
+                  <div
+                    className={`self-center h-20 rounded-md bg-gradient-to-br from-blue-500 to-cyan-600`}
+                    style={{ aspectRatio: item.width / item.height }}
+                  />
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">{`${item.width}x${item.height}`}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-      <div className="mt-4 w-full flex justify-center">
-        <Button
-          onClick={changeStep}
-          className="bg-gradient-to-br from-blue-500 to-cyan-600"
-        >
-          Avançar <ChevronRight />
-        </Button>
-      </div>
+          <div className="mt-4 w-full flex justify-center">
+            <Button
+              onClick={changeStep}
+              className="bg-gradient-to-br from-blue-500 to-cyan-600"
+            >
+              Avançar <ChevronRight />
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="w-full text-center">
+          <p className="text-muted-foreground">Nenhum modelo encontrado</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,18 +1,35 @@
-import { modelo } from "@/constants/modelo";
+export type stepType =
+  | "model"
+  | "template"
+  | "selection"
+  | "crop"
+  | "mask"
+  | "preview";
 
-export type stepType = "modelo" | "tipo" | "selection" | "crop" | "preview";
+export type templateItemType = {
+  id: number;
+  src: string;
+  styles: {
+    chapeu: {
+      div: string;
+      p: string;
+    } | null;
+    title: {
+      div: string;
+      h2: string;
+    };
+  };
+};
 
-export type selectType = {
-  modelo: keyof typeof modelo | null;
-  template: string | null;
-  news: string | undefined;
+export type templateType = { 
+  [key: string]: templateItemType[]
 };
 
 export type newsType = {
   id: number;
   title: string;
   image: string;
-  chapeu: string
+  chapeu: string;
 };
 
 export type pixelCropType = {
@@ -23,7 +40,14 @@ export type pixelCropType = {
 };
 
 export type configType = {
+  id: string;
   title: string;
   width: number;
   height: number;
+};
+
+export type selectType = {
+  modelo: configType | null;
+  template: templateItemType | null;
+  news: string | undefined;
 };

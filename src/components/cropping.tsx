@@ -1,5 +1,4 @@
 import { configType, newsType, selectType, stepType } from "@/app/type";
-import { modelo } from "@/constants/modelo";
 import {
   Dispatch,
   SetStateAction,
@@ -16,6 +15,7 @@ interface CroppingProps {
   next: stepType;
   previous: stepType;
   select: selectType;
+  model: configType[];
   onChangeStep: (step: stepType) => void;
   setCroppedImage: Dispatch<SetStateAction<string | null>>;
 }
@@ -78,10 +78,11 @@ export async function getCroppedImg(
 
 export default function Cropping({
   next,
-  previous,
+  model,
   select,
-  setCroppedImage,
+  previous,
   onChangeStep,
+  setCroppedImage,
 }: CroppingProps) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -93,7 +94,7 @@ export default function Cropping({
       return { config: null, newsData: null };
     }
     try {
-      const config = modelo[select.modelo];
+      const config = model.find(item=>item.id === select.modelo?.id)!
       const newsData: newsType = JSON.parse(select.news);
       return { config, newsData };
     } catch (error) {

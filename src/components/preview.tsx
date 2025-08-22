@@ -1,12 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
-import { newsType, selectType, stepType } from "@/app/type";
-import { modelo } from "@/constants/modelo";
+import { configType, newsType, selectType, stepType } from "@/app/type";
 import html2canvas from "html2canvas-pro";
 import { ChevronLeft, Download } from "lucide-react";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
+import Loading from "./loading";
 
 interface PropsType {
+  model: configType[];
   previous: stepType;
   select: selectType;
   croppedImage: string;
@@ -14,19 +15,21 @@ interface PropsType {
 }
 
 export default function Preview({
-  previous,
+  model,
   select,
+  previous,
   croppedImage,
   onChangeStep,
 }: PropsType) {
   const postPreviewRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const { config, newsData } = useMemo(() => {
     if (!select.modelo || !select.news) {
       return { config: null, newsData: null };
     }
     try {
-      const config = modelo[select.modelo];
+      const config = model.find((item) => item.id === select.modelo?.id)!;
       const newsData: newsType = JSON.parse(select.news);
       return { config, newsData };
     } catch (error) {
@@ -40,6 +43,7 @@ export default function Preview({
   };
 
   const downloadMergedImage = async () => {
+    setLoading(true);
     const element = postPreviewRef.current;
     if (!element || !config) return;
 
@@ -59,6 +63,7 @@ export default function Preview({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setLoading(false);
   };
 
   // Renderiza um estado de carregamento se os dados não estiverem prontos
@@ -81,32 +86,50 @@ export default function Preview({
           style={{
             backgroundImage: `url(${croppedImage})`,
             aspectRatio: `${config.width} / ${config.height}`,
-            // Adicione esta linha para resolver o problema de herança
             backgroundColor: "transparent",
           }}
         >
           <img
-            src={select.template!}
+            src={select.template?.src}
             alt="Moldura do post"
             className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
           />
 
-          {newsData.chapeu && (
-            <div className="absolute top-[77.3%] left-[6%] z-20 p-0 w-[156px] h-[21px] flex items-center justify-center">
+          {/* {select?.template?.styles?.chapeu && (
+            <div className="absolute top-[3%] left-[8%] z-20">
               <p
                 dangerouslySetInnerHTML={{
                   __html: newsData.chapeu.toUpperCase(),
                 }}
-                className="m-0 text-[8px] mt-[2px] sm:text-xs text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                className="font-inter text-xl text-white font-black [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
               />
             </div>
           )}
 
-          {newsData.title && (
-            <div className="absolute top-[82%] left-[2.5%] z-20 p-0 w-[95%] text-left">
+          {select?.template?.styles?.title && (
+            <div className="absolute top-[9%] left-[5%] z-20 w-[77%] border-l-6 pl-2 border-[#5a0808]">
               <h2
                 dangerouslySetInnerHTML={{ __html: newsData.title }}
-                className="font-bold text-sm sm:text-2xl text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                className="font-montserrat font-bold text-[28px] leading-[28px] text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_80%)]"
+              />
+            </div>
+          )} */}
+          {select?.template?.styles?.chapeu && (
+            <div className={select.template.styles.chapeu.div}>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: newsData.chapeu.toUpperCase(),
+                }}
+                className={select.template.styles.chapeu.p}
+              />
+            </div>
+          )}
+
+          {select?.template?.styles?.title && (
+            <div className={select.template.styles.title.div}>
+              <h2
+                dangerouslySetInnerHTML={{ __html: newsData.title }}
+                className={select.template.styles.title.h2}
               />
             </div>
           )}
@@ -116,16 +139,24 @@ export default function Preview({
       <div className="mt-8 w-full flex justify-center gap-4">
         <Button
           onClick={previousChangeStep}
+          disabled={loading}
           className="bg-gradient-to-br from-blue-500 to-cyan-600"
         >
           <ChevronLeft size={18} /> Voltar
         </Button>
-        <Button
-          onClick={downloadMergedImage}
-          className="bg-gradient-to-br from-blue-500 to-cyan-600"
-        >
-          Baixar Imagem <Download size={18} />
-        </Button>
+        {!loading && (
+          <Button
+            onClick={downloadMergedImage}
+            className="bg-gradient-to-br from-blue-500 to-cyan-600"
+          >
+            Baixar Imagem <Download size={18} />
+          </Button>
+        )}
+        {loading && (
+          <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
+            <Loading />
+          </Button>
+        )}
       </div>
     </div>
   );

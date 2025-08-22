@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { selectType, stepType } from "@/app/type";
-import { template } from "@/constants/template";
+import { selectType, stepType, templateType } from "@/app/type";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
@@ -12,6 +11,7 @@ type PropsType = {
   next: stepType;
   previus: stepType;
   select: selectType;
+  template: templateType
   onChangeStep: (step: stepType) => void;
   setSelect: Dispatch<SetStateAction<selectType>>;
 };
@@ -20,6 +20,7 @@ export default function Template({
   next,
   select,
   previus,
+  template,
   setSelect,
   onChangeStep,
 }: PropsType) {
@@ -32,9 +33,7 @@ export default function Template({
     onChangeStep(next);
   }
 
-  console.log(select)
-
-  const templates = template[select.modelo!]
+  const templates = select.modelo?.id !== undefined ? template[select.modelo.id] : [];
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -45,7 +44,7 @@ export default function Template({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {templates.map((item) => (
           <Card
-            key={item}
+            key={item.id}
             onClick={() =>
               setSelect((cur) => ({
                 ...cur,
@@ -60,7 +59,7 @@ export default function Template({
           >
             <CardContent className="flex justify-center">
               <img
-                src={item}
+                src={item.src}
                 alt="Template"
                 className="w-full h-56 object-contain"
               />
