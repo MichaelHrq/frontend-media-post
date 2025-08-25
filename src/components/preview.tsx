@@ -95,7 +95,7 @@ export default function Preview({
             className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
           />
 
-          {select?.template?.styles?.chapeu && (
+          {/* {select?.template?.styles?.chapeu && (
             <div className="absolute top-[77.3%] left-[6%] text-nowrap z-20 p-0 w-[145px] h-[20px] flex items-center justify-center">
               <p
                 dangerouslySetInnerHTML={{
@@ -113,9 +113,9 @@ export default function Preview({
                 className="font-bold font-montserrat text-[20px] leading-6 text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
               />
             </div>
-          )}
+          )} */}
 
-          {/* {select?.template?.styles?.chapeu && (
+          {select?.template?.styles?.chapeu && (
             <div className={select.template.styles.chapeu.div}>
               <p
                 dangerouslySetInnerHTML={{
@@ -133,7 +133,7 @@ export default function Preview({
                 className={select.template.styles.title.h2}
               />
             </div>
-          )} */}
+          )}
         </div>
       </div>
 
