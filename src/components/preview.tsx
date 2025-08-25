@@ -82,7 +82,7 @@ export default function Preview({
       <div className="w-full flex justify-center">
         <div
           ref={postPreviewRef}
-          className="relative w-full max-w-lg rounded bg-cover bg-center overflow-hidden"
+          className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
           style={{
             backgroundImage: `url(${croppedImage})`,
             aspectRatio: `${config.width} / ${config.height}`,
@@ -96,29 +96,30 @@ export default function Preview({
           />
 
           {select?.template?.styles?.chapeu && (
-            <div className="absolute top-[3%] left-[8%] z-20">
+            <div className="absolute top-[77.3%] left-[6%] text-nowrap z-20 p-0 w-[145px] h-[20px] flex items-center justify-center">
               <p
                 dangerouslySetInnerHTML={{
-                  __html: newsData.chapeu.toUpperCase(),
+                  __html: newsData.chapeu,
                 }}
-                className="font-inter text-xl text-white font-black [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                className="font-montserrat uppercase mt-0.5 text-[10px] text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
               />
             </div>
           )}
 
           {select?.template?.styles?.title && (
-            <div className="absolute top-[10%] left-[5%] z-20 w-[80%] border-l-6 pl-2 border-[#5a0808]">
+            <div className="absolute top-[82%] left-[6%] z-20 p-0 w-[92%] text-left">
               <h2
                 dangerouslySetInnerHTML={{ __html: newsData.title }}
-                className="font-inter font-bold text-[26px] leading-[28px] text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_80%)]"
+                className="font-bold font-montserrat text-[20px] leading-6 text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
               />
             </div>
           )}
+
           {/* {select?.template?.styles?.chapeu && (
             <div className={select.template.styles.chapeu.div}>
               <p
                 dangerouslySetInnerHTML={{
-                  __html: newsData.chapeu.toUpperCase(),
+                  __html: newsData.chapeu,
                 }}
                 className={select.template.styles.chapeu.p}
               />
