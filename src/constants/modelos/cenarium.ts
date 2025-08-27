@@ -17,4 +17,10 @@ export const cenariumModel = [
     width: 1080,
     height: 1920,
   },
+  {
+    id: "reels",
+    title: "Reels Thubmnail",
+    width: 1080,
+    height: 1920,
+  },
 ];

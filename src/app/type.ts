@@ -1,3 +1,5 @@
+import { CSSProperties } from "react";
+
 export type stepType =
   | "model"
   | "template"
@@ -6,23 +8,35 @@ export type stepType =
   | "mask"
   | "preview";
 
+export type maskItemType = {
+  id: number;
+  src: string;
+  styles: {
+    [key: string]: CSSProperties;
+  };
+};
+
+export type masksType = {
+  [key: string]: maskItemType[];
+};
+
 export type templateItemType = {
   id: number;
   src: string;
   styles: {
     chapeu: {
-      div: string;
-      p: string;
+      div: CSSProperties;
+      p: CSSProperties;
     } | null;
     title: {
-      div: string;
-      h2: string;
+      div: CSSProperties;
+      h2: CSSProperties;
     };
   };
 };
 
-export type templateType = { 
-  [key: string]: templateItemType[]
+export type templateType = {
+  [key: string]: templateItemType[];
 };
 
 export type newsType = {
@@ -50,4 +64,5 @@ export type selectType = {
   modelo: configType | null;
   template: templateItemType | null;
   news: string | undefined;
+  mask: maskItemType | undefined
 };

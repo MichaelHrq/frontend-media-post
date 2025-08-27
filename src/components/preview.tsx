@@ -3,8 +3,9 @@ import { configType, newsType, selectType, stepType } from "@/app/type";
 import html2canvas from "html2canvas-pro";
 import { ChevronLeft, Download } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import Loading from "./loading";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PropsType {
   model: configType[];
@@ -22,6 +23,14 @@ export default function Preview({
   onChangeStep,
 }: PropsType) {
   const postPreviewRef = useRef<HTMLDivElement | null>(null);
+  const maskPreviewRef = useRef<HTMLDivElement | null>(null);
+
+  const [tab, setTab] = useState<"post" | "mask">("post");
+
+  const onChangeTab = (tab: "post" | "mask") => {
+    setTab(tab);
+  };
+
   const [loading, setLoading] = useState(false);
 
   const { config, newsData } = useMemo(() => {
@@ -46,27 +55,62 @@ export default function Preview({
     setLoading(true);
     const element = postPreviewRef.current;
     if (!element || !config) return;
-
-    // Calcula a escala para que o canvas final tenha a largura desejada
     const scale = config.width / element.offsetWidth;
-
     const canvas = await html2canvas(element, {
       useCORS: true,
       scale: scale,
-      // Fundo transparente para que o backgroundImage do div seja capturado
       backgroundColor: null,
     });
-
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/jpeg", 0.95);
-    link.download = `post_${config.width}x${config.height}.jpeg`;
+    link.download = `post_${config.id}.jpeg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     setLoading(false);
   };
 
-  // Renderiza um estado de carregamento se os dados não estiverem prontos
+  const adjustFontSize = (
+    element: HTMLParagraphElement | null,
+    fontSizeValue: string | number | undefined
+  ) => {
+    if (!element || !fontSizeValue) return;
+
+    let fontSize: number;
+
+    if (typeof fontSizeValue === "string") {
+      const parsedValue = parseFloat(fontSizeValue);
+      if (fontSizeValue.endsWith("rem")) {
+        // Assumindo que a fonte base do root é 16px para conversão de rem para px
+        fontSize = parsedValue * 16;
+      } else {
+        fontSize = parsedValue;
+      }
+    } else {
+      fontSize = fontSizeValue;
+    }
+
+    if (isNaN(fontSize)) return;
+
+    element.style.fontSize = `${fontSize}px`; // Define o tamanho inicial
+
+    // Enquanto o texto for maior que o contêiner, diminui o tamanho da fonte
+    while (
+      element.offsetWidth > (element.parentNode as HTMLElement)!.offsetWidth &&
+      fontSize > 6
+    ) {
+      fontSize -= 0.5; // Reduz o tamanho da fonte
+      element.style.fontSize = `${fontSize}px`; // Aplica o novo tamanho
+    }
+
+    // Se o texto ainda for maior que o contêiner após as reduções, esconde o texto
+    if (
+      element.offsetWidth > (element.parentNode as HTMLElement)!.offsetWidth
+    ) {
+      element.style.display = "none"; // Esconde o elemento se o texto ainda for muito grande
+    }
+  };
+
   if (!config || !newsData) {
     return (
       <div className="px-4 py-2 max-w-5xl mx-auto text-center">
@@ -77,88 +121,161 @@ export default function Preview({
 
   return (
     <div className="px-4 py-2 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">Preview do Post</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Preview</h2>
 
-      <div className="w-full flex justify-center">
-        <div
-          ref={postPreviewRef}
-          className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
-          style={{
-            backgroundImage: `url(${croppedImage})`,
-            aspectRatio: `${config.width} / ${config.height}`,
-            backgroundColor: "transparent",
-          }}
-        >
-          <img
-            src={select.template?.src}
-            alt="Moldura do post"
-            className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
-          />
+      <Tabs defaultValue="post" className="items-center">
+        <TabsList>
+          {select.mask && (
+            <>
+              <TabsTrigger value="post">Post</TabsTrigger>
+              <TabsTrigger value="mascara">Máscara</TabsTrigger>
+            </>
+          )}
+        </TabsList>
+        <TabsContent value="post">
+          <div className="w-full flex justify-center">
+            <div
+              ref={postPreviewRef}
+              className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
+              style={{
+                backgroundImage: `url(${croppedImage})`,
+                aspectRatio: `${config.width} / ${config.height}`,
+                backgroundColor: "transparent",
+              }}
+            >
+              <img
+                src={select.template?.src}
+                alt="Moldura do post"
+                className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
+              />
 
-          {/* {select?.template?.styles?.chapeu && (
-            <div className="absolute top-[77.3%] left-[6%] text-nowrap z-20 p-0 w-[145px] h-[20px] flex items-center justify-center">
+              {select?.template?.styles?.chapeu && (
+                <div className="absolute top-[58%] left-[4%] text-nowrap z-10 bg-neutral-950 py-0.5 px-2">
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: newsData.chapeu,
+                    }}
+                    // ref={(element) => adjustFontSize(element)}
+                    className="font-montserrat uppercase text-[18px] text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                  />
+                </div>
+              )}
+
+              {select?.template?.styles?.title && (
+                <div
+                  className="absolute top-[63%] left-[4%] z-20 w-[75%] pl-4 py-0.5
+             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white
+            before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
+                >
+                  <h2
+                    dangerouslySetInnerHTML={{ __html: newsData.title }}
+                    className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
+                  />
+                </div>
+              )}
+
+              {/* {select?.template?.styles?.chapeu && (
+            <div style={select.template.styles.chapeu.div}>
               <p
                 dangerouslySetInnerHTML={{
                   __html: newsData.chapeu,
                 }}
-                className="font-montserrat uppercase mt-0.5 text-[10px] text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                ref={(element) =>
+                  adjustFontSize(element, select.template?.styles.chapeu?.p.fontSize)
+                }
+                style={select.template.styles.chapeu.p}
               />
             </div>
           )}
 
           {select?.template?.styles?.title && (
-            <div className="absolute top-[82%] left-[6%] z-20 p-0 w-[92%] text-left">
+            <div style={select.template.styles.title.div}>
               <h2
                 dangerouslySetInnerHTML={{ __html: newsData.title }}
-                className="font-bold font-montserrat text-[20px] leading-6 text-white [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                style={select.template.styles.title.h2}
               />
             </div>
           )} */}
-
-          {select?.template?.styles?.chapeu && (
-            <div className={select.template.styles.chapeu.div}>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: newsData.chapeu,
-                }}
-                className={select.template.styles.chapeu.p}
-              />
             </div>
-          )}
-
-          {select?.template?.styles?.title && (
-            <div className={select.template.styles.title.div}>
-              <h2
-                dangerouslySetInnerHTML={{ __html: newsData.title }}
-                className={select.template.styles.title.h2}
+          </div>
+          <div className="mt-8 w-full flex justify-center gap-4">
+            <Button
+              onClick={previousChangeStep}
+              disabled={loading}
+              className="bg-gradient-to-br from-blue-500 to-cyan-600"
+            >
+              <ChevronLeft size={18} /> Voltar
+            </Button>
+            {!loading && (
+              <Button
+                onClick={downloadMergedImage}
+                className="bg-gradient-to-br from-blue-500 to-cyan-600"
+              >
+                Baixar Imagem <Download size={18} />
+              </Button>
+            )}
+            {loading && (
+              <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
+                <Loading />
+              </Button>
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="mascara">
+          <div className="w-full flex justify-center">
+            <div
+              ref={postPreviewRef}
+              className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden border"
+              style={{
+                // backgroundImage: `url(${croppedImage})`,
+                aspectRatio: `${config.width} / ${config.height}`,
+                backgroundColor: "transparent",
+              }}
+            >
+              <img
+                src={select.mask?.src}
+                alt="Moldura do post"
+                className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
               />
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div className="mt-8 w-full flex justify-center gap-4">
-        <Button
-          onClick={previousChangeStep}
-          disabled={loading}
-          className="bg-gradient-to-br from-blue-500 to-cyan-600"
-        >
-          <ChevronLeft size={18} /> Voltar
-        </Button>
-        {!loading && (
-          <Button
-            onClick={downloadMergedImage}
-            className="bg-gradient-to-br from-blue-500 to-cyan-600"
-          >
-            Baixar Imagem <Download size={18} />
-          </Button>
-        )}
-        {loading && (
-          <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
-            <Loading />
-          </Button>
-        )}
-      </div>
+              {select?.template?.styles?.title && (
+                <div
+                  className="absolute bottom-[76%] left-[4%] z-20 w-[75%] pl-4 
+             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white
+            before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
+                >
+                  <h2
+                    dangerouslySetInnerHTML={{ __html: newsData.title }}
+                    className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-8 w-full flex justify-center gap-4">
+            <Button
+              onClick={previousChangeStep}
+              disabled={loading}
+              className="bg-gradient-to-br from-blue-500 to-cyan-600"
+            >
+              <ChevronLeft size={18} /> Voltar
+            </Button>
+            {!loading && (
+              <Button
+                onClick={downloadMergedImage}
+                className="bg-gradient-to-br from-blue-500 to-cyan-600"
+              >
+                Baixar Imagem <Download size={18} />
+              </Button>
+            )}
+            {loading && (
+              <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
+                <Loading />
+              </Button>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
