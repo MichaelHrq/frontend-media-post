@@ -149,7 +149,7 @@ export default function Preview({
                 className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
               />
 
-              {select?.template?.styles?.chapeu && (
+              {/* {select?.template?.styles?.chapeu && (
                 <div className="absolute top-[58%] left-[4%] text-nowrap z-10 bg-neutral-950 py-0.5 px-2">
                   <p
                     dangerouslySetInnerHTML={{
@@ -172,9 +172,9 @@ export default function Preview({
                     className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
                   />
                 </div>
-              )}
+              )} */}
 
-              {/* {select?.template?.styles?.chapeu && (
+              {select?.template?.styles?.chapeu && (
             <div style={select.template.styles.chapeu.div}>
               <p
                 dangerouslySetInnerHTML={{
@@ -195,7 +195,7 @@ export default function Preview({
                 style={select.template.styles.title.h2}
               />
             </div>
-          )} */}
+          )}
             </div>
           </div>
           <div className="mt-8 w-full flex justify-center gap-4">

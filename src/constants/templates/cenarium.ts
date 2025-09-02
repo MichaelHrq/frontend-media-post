@@ -114,7 +114,6 @@ export const cenariumTemplate: templateType = {
             lineHeight: "1.75rem",
             color: "white",
             fontWeight: 900,
-            textShadow: "2px 2px 10px #000, -2px -2px 10px #000, 2px -2px 10px #000, -2px 2px 10px #000",
           },
         },
         title: {
