@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { configType, newsType, selectType, stepType } from "@/app/type";
-import html2canvas from "html2canvas-pro";
-import { ChevronLeft, Download, Edit } from "lucide-react";
-import { useMemo, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Loading from "./loading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import html2canvas from "html2canvas-pro";
+import { ChevronLeft, CircleAlert, Download } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Loading from "./loading";
 
 interface PropsType {
   model: configType[];
@@ -125,10 +125,7 @@ export default function Preview({
     <div className="px-4 py-2 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Preview</h2>
 
-      <Tabs
-        defaultValue="post"
-        className="items-center"
-      >
+      <Tabs defaultValue="post" className="items-center">
         <TabsList>
           {select.mask && (
             <>
@@ -138,7 +135,7 @@ export default function Preview({
           )}
         </TabsList>
         <TabsContent value="post">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center shadow">
             <div
               ref={postPreviewRef}
               className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
@@ -160,14 +157,20 @@ export default function Preview({
                       __html: newsData.chapeu,
                     }}
                     ref={(element) =>
-                      adjustFontSize(element, select.template?.styles.chapeu?.p.fontSize)
+                      adjustFontSize(
+                        element,
+                        select.template?.styles.chapeu?.p.fontSize
+                      )
                     }
                     style={select.template.styles.chapeu.p}
                   />
                 </div>
               )}
               {select?.template?.styles?.title && (
-                <div style={select.template.styles.title.div}>
+                <div
+                  style={select.template.styles.title.div}
+                  className="cursor-pointer"
+                >
                   <h2
                     contentEditable
                     suppressContentEditableWarning={true}
@@ -178,6 +181,15 @@ export default function Preview({
                 </div>
               )}
             </div>
+          </div>
+          <div className="mt-8 w-full flex justify-center bg-blue-100 rounded py-2 flex-row gap-2">
+            <CircleAlert
+              size={18}
+              className="text-blue-400 text-sm font-bold"
+            />
+            <p className="text-blue-400 text-sm font-bold">
+              Clique no título da matéria para editá-lo
+            </p>
           </div>
           <div className="mt-8 w-full flex justify-center gap-4">
             <Button
@@ -259,6 +271,7 @@ export default function Preview({
           </div>
         </TabsContent>
       </Tabs>
+      <div></div>
     </div>
   );
 }
