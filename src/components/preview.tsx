@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { configType, newsType, selectType, stepType } from "@/app/type";
 import html2canvas from "html2canvas-pro";
-import { ChevronLeft, Download } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { ChevronLeft, Download, Edit } from "lucide-react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Loading from "./loading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,12 +25,6 @@ export default function Preview({
   const postPreviewRef = useRef<HTMLDivElement | null>(null);
   const maskPreviewRef = useRef<HTMLDivElement | null>(null);
 
-  const [tab, setTab] = useState<"post" | "mask">("post");
-
-  const onChangeTab = (tab: "post" | "mask") => {
-    setTab(tab);
-  };
-
   const [loading, setLoading] = useState(false);
 
   const { config, newsData } = useMemo(() => {
@@ -47,13 +41,21 @@ export default function Preview({
     }
   }, [select.modelo, select.news]);
 
+  const [title, setTitle] = useState(newsData?.title ?? "");
+
+  useEffect(() => {
+    if (newsData?.title) {
+      setTitle(newsData.title);
+    }
+  }, [newsData?.title]);
+
   const previousChangeStep = () => {
     onChangeStep(previous);
   };
 
   const downloadMergedImage = async () => {
     setLoading(true);
-    const element = postPreviewRef.current;
+    const element = postPreviewRef.current; // Assumindo que sempre queremos baixar o "post"
     if (!element || !config) return;
     const scale = config.width / element.offsetWidth;
     const canvas = await html2canvas(element, {
@@ -62,7 +64,7 @@ export default function Preview({
       backgroundColor: null,
     });
     const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/jpeg", 0.95);
+    link.href = canvas.toDataURL("image/jpeg", 1.0);
     link.download = `post_${config.id}.jpeg`;
     document.body.appendChild(link);
     link.click();
@@ -123,7 +125,10 @@ export default function Preview({
     <div className="px-4 py-2 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Preview</h2>
 
-      <Tabs defaultValue="post" className="items-center">
+      <Tabs
+        defaultValue="post"
+        className="items-center"
+      >
         <TabsList>
           {select.mask && (
             <>
@@ -148,54 +153,30 @@ export default function Preview({
                 alt="Moldura do post"
                 className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
               />
-
-              {/* {select?.template?.styles?.chapeu && (
-                <div className="absolute top-[58%] left-[4%] text-nowrap z-10 bg-neutral-950 py-0.5 px-2">
+              {select?.template?.styles?.chapeu && (
+                <div style={select.template.styles.chapeu.div}>
                   <p
                     dangerouslySetInnerHTML={{
                       __html: newsData.chapeu,
                     }}
-                    // ref={(element) => adjustFontSize(element)}
-                    className="font-montserrat uppercase text-[18px] text-white font-bold [text-shadow:_2px_2px_4px_rgb(0_0_0_/_50%)]"
+                    ref={(element) =>
+                      adjustFontSize(element, select.template?.styles.chapeu?.p.fontSize)
+                    }
+                    style={select.template.styles.chapeu.p}
                   />
                 </div>
               )}
-
               {select?.template?.styles?.title && (
-                <div
-                  className="absolute top-[63%] left-[4%] z-20 w-[75%] pl-4 py-0.5
-             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white
-            before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
-                >
+                <div style={select.template.styles.title.div}>
                   <h2
-                    dangerouslySetInnerHTML={{ __html: newsData.title }}
-                    className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
+                    contentEditable
+                    suppressContentEditableWarning={true}
+                    onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
+                    dangerouslySetInnerHTML={{ __html: title }}
+                    style={select.template.styles.title.h2}
                   />
                 </div>
-              )} */}
-
-              {select?.template?.styles?.chapeu && (
-            <div style={select.template.styles.chapeu.div}>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: newsData.chapeu,
-                }}
-                ref={(element) =>
-                  adjustFontSize(element, select.template?.styles.chapeu?.p.fontSize)
-                }
-                style={select.template.styles.chapeu.p}
-              />
-            </div>
-          )}
-
-          {select?.template?.styles?.title && (
-            <div style={select.template.styles.title.div}>
-              <h2
-                dangerouslySetInnerHTML={{ __html: newsData.title }}
-                style={select.template.styles.title.h2}
-              />
-            </div>
-          )}
+              )}
             </div>
           </div>
           <div className="mt-8 w-full flex justify-center gap-4">
@@ -224,7 +205,7 @@ export default function Preview({
         <TabsContent value="mascara">
           <div className="w-full flex justify-center">
             <div
-              ref={postPreviewRef}
+              ref={maskPreviewRef}
               className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden border"
               style={{
                 // backgroundImage: `url(${croppedImage})`,
@@ -241,11 +222,13 @@ export default function Preview({
               {select?.template?.styles?.title && (
                 <div
                   className="absolute bottom-[76%] left-[4%] z-20 w-[75%] pl-4 
-             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white
-            before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
+             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
                 >
                   <h2
-                    dangerouslySetInnerHTML={{ __html: newsData.title }}
+                    contentEditable
+                    suppressContentEditableWarning={true}
+                    onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
+                    dangerouslySetInnerHTML={{ __html: title }}
                     className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
                   />
                 </div>
