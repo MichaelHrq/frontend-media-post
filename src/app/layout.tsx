@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Montserrat } from "next/font/google";
 import { Toaster } from "sonner";
 import "../styles/globals.css";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body className={`${fonts} antialiased bg-neutral-100`}>
         {children}
         <Toaster richColors closeButton />
+        <Analytics />
       </body>
     </html>
   );

@@ -2,6 +2,7 @@
 import { configType, newsType, selectType, stepType } from "@/app/type";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { track } from "@vercel/analytics/react";
 import html2canvas from "html2canvas-pro";
 import { ChevronLeft, CircleAlert, Download } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -42,12 +43,16 @@ export default function Preview({
   }, [select.modelo, select.news]);
 
   const [title, setTitle] = useState(newsData?.title ?? "");
+  const [chapeu, setChapeu] = useState(newsData?.chapeu ?? "");
 
   useEffect(() => {
     if (newsData?.title) {
       setTitle(newsData.title);
     }
-  }, [newsData?.title]);
+    if (newsData?.chapeu) {
+      setChapeu(newsData.chapeu);
+    }
+  }, [newsData?.title, newsData?.chapeu]);
 
   const previousChangeStep = () => {
     onChangeStep(previous);
@@ -55,6 +60,11 @@ export default function Preview({
 
   const downloadMergedImage = async () => {
     setLoading(true);
+    track("Download Image", {
+      portal: process.env.NEXT_PUBLIC_PORTAL_NOTICIAS ?? '',
+      modelo: config?.id ?? "desconhecido",
+      titulo: newsData?.title ?? "desconhecido",
+    });
     const element = postPreviewRef.current; // Assumindo que sempre queremos baixar o "post"
     if (!element || !config) return;
     const scale = config.width / element.offsetWidth;
@@ -134,8 +144,8 @@ export default function Preview({
             </>
           )}
         </TabsList>
-        <TabsContent value="post">
-          <div className="w-full flex justify-center shadow">
+        <TabsContent value="post" className="w-full md:w-xl">
+          <div className="w-full flex justify-center">
             <div
               ref={postPreviewRef}
               className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
@@ -153,8 +163,11 @@ export default function Preview({
               {select?.template?.styles?.chapeu && (
                 <div style={select.template.styles.chapeu.div}>
                   <p
+                    contentEditable
+                    suppressContentEditableWarning={true}
+                    onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
                     dangerouslySetInnerHTML={{
-                      __html: newsData.chapeu,
+                      __html: chapeu,
                     }}
                     ref={(element) =>
                       adjustFontSize(
@@ -188,7 +201,7 @@ export default function Preview({
               className="text-blue-400 text-sm font-bold"
             />
             <p className="text-blue-400 text-sm font-bold">
-              Clique no título da matéria para editá-lo
+              Clique no título ou chapéu da matéria para editá-los
             </p>
           </div>
           <div className="mt-8 w-full flex justify-center gap-4">
