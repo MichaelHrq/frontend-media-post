@@ -1,5 +1,9 @@
 import { CSSProperties } from "react";
 
+type CSSPropertiesWithPseudos = CSSProperties & {
+  [key in `&::${string}`]?: CSSProperties;
+};
+
 export type stepType =
   | "model"
   | "template"
@@ -12,7 +16,7 @@ export type maskItemType = {
   id: number;
   src: string;
   styles: {
-    [key: string]: CSSProperties;
+    [key: string]: CSSPropertiesWithPseudos;
   };
 };
 
@@ -24,14 +28,7 @@ export type templateItemType = {
   id: number;
   src: string;
   styles: {
-    chapeu: {
-      div: CSSProperties;
-      p: CSSProperties;
-    } | null;
-    title: {
-      div: CSSProperties;
-      h2: CSSProperties;
-    };
+    [key: string]: { [key: string]: string };
   };
 };
 
@@ -44,6 +41,8 @@ export type newsType = {
   title: string;
   image: string;
   chapeu: string;
+  description: string;
+  url: string;
 };
 
 export type pixelCropType = {

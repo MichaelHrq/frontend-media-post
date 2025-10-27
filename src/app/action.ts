@@ -1,4 +1,4 @@
-"use server"
+// 'use server';
 
 import { newsType } from "./type";
 
@@ -21,12 +21,16 @@ export const fetchData = async () => {
         const postId = item?.id;
         const chapeu = item?.acf?.chapeu;
         const categoria = item?._embedded?.["wp:term"]?.[0]?.[0]?.name;
+        const description = item?.excerpt?.rendered;
+        const url = item?.link?.split('/')?.[2]
         if (imageUrl && postTitle && postId) {
           cur.push({
             id: postId,
             title: postTitle,
             image: imageUrl,
             chapeu: chapeu?.length ? chapeu : categoria.length ? categoria : '',
+            description: description,
+            url: url,
           });
         } 
         return cur

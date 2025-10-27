@@ -12,7 +12,7 @@ type PropsType = {
   select: selectType;
   model: configType[];
   onChangeStep: (step: stepType) => void;
-  onSelectMasks: (key: string) => Promise<void>;
+  onSelectMasks?: (key: string) => Promise<void>;
   setSelect: Dispatch<SetStateAction<selectType>>;
 };
 
@@ -22,7 +22,7 @@ export default function ModelSelect({
   select,
   setSelect,
   onChangeStep,
-  onSelectMasks,
+  // onSelectMasks,
 }: PropsType) {
   const changeStep = () => {
     if (!select.modelo)
@@ -43,7 +43,7 @@ export default function ModelSelect({
               <Card
                 key={item.id}
                 onClick={() => {
-                  onSelectMasks(item.id);
+                  // onSelectMasks(item.id);
                   setSelect((cur) => ({
                     ...cur,
                     modelo: item,

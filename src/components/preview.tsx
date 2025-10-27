@@ -1,10 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { configType, newsType, selectType, stepType } from "@/app/type";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { track } from "@vercel/analytics/react";
 import html2canvas from "html2canvas-pro";
-import { ChevronLeft, CircleAlert, Download } from "lucide-react";
+import { ChevronLeft, Download } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Loading from "./loading";
 
@@ -24,7 +23,7 @@ export default function Preview({
   onChangeStep,
 }: PropsType) {
   const postPreviewRef = useRef<HTMLDivElement | null>(null);
-  const maskPreviewRef = useRef<HTMLDivElement | null>(null);
+  // const maskPreviewRef = useRef<HTMLDivElement | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +43,8 @@ export default function Preview({
 
   const [title, setTitle] = useState(newsData?.title ?? "");
   const [chapeu, setChapeu] = useState(newsData?.chapeu ?? "");
+  const [description, setDescription] = useState(newsData?.description ?? "");
+  const [url, setUrl] = useState(newsData?.url ?? "");
 
   useEffect(() => {
     if (newsData?.title) {
@@ -52,7 +53,13 @@ export default function Preview({
     if (newsData?.chapeu) {
       setChapeu(newsData.chapeu);
     }
-  }, [newsData?.title, newsData?.chapeu]);
+    if (newsData?.description) {
+      setDescription(newsData.description);
+    }
+    if (newsData?.url) {
+      setUrl(newsData.url);
+    }
+  }, [newsData?.title, newsData?.chapeu, newsData?.description, newsData?.url]);
 
   const previousChangeStep = () => {
     onChangeStep(previous);
@@ -61,7 +68,7 @@ export default function Preview({
   const downloadMergedImage = async () => {
     setLoading(true);
     track("Download Image", {
-      portal: process.env.NEXT_PUBLIC_PORTAL_NOTICIAS ?? '',
+      portal: process.env.NEXT_PUBLIC_PORTAL_NOTICIAS ?? "",
       modelo: config?.id ?? "desconhecido",
       titulo: newsData?.title ?? "desconhecido",
     });
@@ -135,155 +142,164 @@ export default function Preview({
     <div className="px-4 py-2 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Preview</h2>
 
-      <Tabs defaultValue="post" className="items-center">
-        <TabsList>
-          {select.mask && (
-            <>
-              <TabsTrigger value="post">Post</TabsTrigger>
-              <TabsTrigger value="mascara">Máscara</TabsTrigger>
-            </>
-          )}
-        </TabsList>
-        <TabsContent value="post" className="w-full md:w-xl">
-          <div className="w-full flex justify-center">
-            <div
-              ref={postPreviewRef}
-              className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
-              style={{
-                backgroundImage: `url(${croppedImage})`,
-                aspectRatio: `${config.width} / ${config.height}`,
-                backgroundColor: "transparent",
-              }}
-            >
-              <img
-                src={select.template?.src}
-                alt="Moldura do post"
-                className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
+      <div className="w-full flex justify-center">
+        <div
+          ref={postPreviewRef}
+          className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
+          style={{
+            backgroundImage: `url(${croppedImage})`,
+            aspectRatio: `${config.width} / ${config.height}`,
+            backgroundColor: "transparent",
+          }}
+        >
+          <img
+            src={select.template?.src}
+            alt="Moldura do post"
+            className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
+          />
+          {select?.template?.styles?.chapeu && (
+            <div className={select.template.styles.chapeu.div}>
+              <p
+                contentEditable
+                suppressContentEditableWarning={true}
+                onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{
+                  __html: chapeu,
+                }}
+                // ref={(element) =>
+                //   adjustFontSize(
+                //     element,
+                //     select.template?.styles.chapeu?.p.fontSize
+                //   )
+                // }
+                className={select.template.styles.chapeu.p}
               />
-              {select?.template?.styles?.chapeu && (
-                <div style={select.template.styles.chapeu.div}>
-                  <p
-                    contentEditable
-                    suppressContentEditableWarning={true}
-                    onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
-                    dangerouslySetInnerHTML={{
-                      __html: chapeu,
-                    }}
-                    ref={(element) =>
-                      adjustFontSize(
-                        element,
-                        select.template?.styles.chapeu?.p.fontSize
-                      )
-                    }
-                    style={select.template.styles.chapeu.p}
-                  />
-                </div>
-              )}
-              {select?.template?.styles?.title && (
-                <div
-                  style={select.template.styles.title.div}
-                  className="cursor-pointer"
-                >
-                  <h2
-                    contentEditable
-                    suppressContentEditableWarning={true}
-                    onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
-                    dangerouslySetInnerHTML={{ __html: title }}
-                    style={select.template.styles.title.h2}
-                  />
-                </div>
-              )}
             </div>
-          </div>
-          <div className="mt-8 w-full flex justify-center bg-blue-100 rounded py-2 flex-row gap-2">
-            <CircleAlert
-              size={18}
-              className="text-blue-400 text-sm font-bold"
-            />
-            <p className="text-blue-400 text-sm font-bold">
-              Clique no título ou chapéu da matéria para editá-los
-            </p>
-          </div>
-          <div className="mt-8 w-full flex justify-center gap-4">
-            <Button
-              onClick={previousChangeStep}
-              disabled={loading}
-              className="bg-gradient-to-br from-blue-500 to-cyan-600"
-            >
-              <ChevronLeft size={18} /> Voltar
-            </Button>
-            {!loading && (
-              <Button
-                onClick={downloadMergedImage}
-                className="bg-gradient-to-br from-blue-500 to-cyan-600"
-              >
-                Baixar Imagem <Download size={18} />
-              </Button>
-            )}
-            {loading && (
-              <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
-                <Loading />
-              </Button>
-            )}
-          </div>
-        </TabsContent>
-        <TabsContent value="mascara">
-          <div className="w-full flex justify-center">
-            <div
-              ref={maskPreviewRef}
-              className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden border"
-              style={{
-                // backgroundImage: `url(${croppedImage})`,
-                aspectRatio: `${config.width} / ${config.height}`,
-                backgroundColor: "transparent",
-              }}
-            >
-              <img
-                src={select.mask?.src}
-                alt="Moldura do post"
-                className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
+          )}
+          {select?.template?.styles?.title && (
+            <div className={select.template.styles.title.div}>
+              <h2
+                contentEditable
+                suppressContentEditableWarning={true}
+                onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{ __html: title }}
+                className={select.template.styles.title.h2}
               />
 
-              {select?.template?.styles?.title && (
-                <div
-                  className="absolute bottom-[76%] left-[4%] z-20 w-[75%] pl-4 
-             after:h-[90%] after:w-[3px] after:content-[''] after:absolute after:top-1/2 after:translate-y-[-50%] after:left-1.5 after:bg-white before:h-full before:w-[16px] before:content-[''] before:absolute before:top-0 before:left-0 before:bg-neutral-950"
-                >
-                  <h2
-                    contentEditable
-                    suppressContentEditableWarning={true}
-                    onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
-                    dangerouslySetInnerHTML={{ __html: title }}
-                    className="font-bold font-montserrat text-[16px] leading-2 text-white bg-neutral-950 py-1 pr-1 inline box-decoration-clone"
-                  />
-                </div>
+              {select?.template?.styles?.description && (
+                <p
+                  contentEditable
+                  suppressContentEditableWarning={true}
+                  onBlur={(e) => setDescription(e.currentTarget.innerHTML)}
+                  dangerouslySetInnerHTML={{ __html: description }}
+                  className={select.template.styles.description.p}
+                />
               )}
             </div>
-          </div>
-          <div className="mt-8 w-full flex justify-center gap-4">
-            <Button
-              onClick={previousChangeStep}
-              disabled={loading}
-              className="bg-gradient-to-br from-blue-500 to-cyan-600"
-            >
-              <ChevronLeft size={18} /> Voltar
-            </Button>
-            {!loading && (
-              <Button
-                onClick={downloadMergedImage}
-                className="bg-gradient-to-br from-blue-500 to-cyan-600"
-              >
-                Baixar Imagem <Download size={18} />
-              </Button>
-            )}
-            {loading && (
-              <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
-                <Loading />
-              </Button>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+          )}
+
+          {select?.template?.styles?.url && (
+            <div className={select.template.styles.url.div}>
+              <p
+                contentEditable
+                suppressContentEditableWarning={true}
+                dangerouslySetInnerHTML={{ __html: url }}
+                className={select.template.styles.url.p}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* <div className="w-full flex justify-center">
+        <div
+          ref={postPreviewRef}
+          className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
+          style={{
+            backgroundImage: `url(${croppedImage})`,
+            aspectRatio: `${config.width} / ${config.height}`,
+            backgroundColor: "transparent",
+          }}
+        >
+          <img
+            src={select.template?.src}
+            alt="Moldura do post"
+            className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
+          />
+          {select?.template?.styles?.chapeu && (
+            <div className={select.template.styles.chapeu.div}>
+              <p
+                contentEditable
+                suppressContentEditableWarning={true}
+                onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{
+                  __html: chapeu,
+                }}
+                // ref={(element) =>
+                //   adjustFontSize(
+                //     element,
+                //     select.template?.styles.chapeu?.p.fontSize
+                //   )
+                // }
+                className={select.template.styles.chapeu.p}
+              />
+            </div>
+          )}
+          {select?.template?.styles?.title && (
+            <div className={select.template.styles.title.div}>
+              <h2
+                contentEditable
+                suppressContentEditableWarning={true}
+                onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
+                dangerouslySetInnerHTML={{ __html: title }}
+                className={select.template.styles.title.h2}
+              />
+
+              {select?.template?.styles?.description && (
+                <p
+                  contentEditable
+                  suppressContentEditableWarning={true}
+                  onBlur={(e) => setDescription(e.currentTarget.innerHTML)}
+                  dangerouslySetInnerHTML={{ __html: description }}
+                  className="text-xs text-white font-inter font-semibold [text-shadow:2px_2px_10px_#000,-2px_-2px_10px_#000,2px_-2px_10px_#000,-2px_2px_10px_#000]"
+                />
+              )}
+            </div>
+          )}
+
+          {select?.template?.styles?.url && (
+            <div className={select.template.styles.url.div}>
+              <p
+                dangerouslySetInnerHTML={{ __html: url }}
+                className="text-xs absolute z-20 bottom-5 left-[5%] text-white font-inter font-bold [text-shadow:2px_2px_10px_#000,-2px_-2px_10px_#000,2px_-2px_10px_#000,-2px_2px_10px_#000] after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-20 after:h-[3px] after:bg-[#5a0808]"
+              />
+            </div>
+          )}
+        </div>
+      </div> */}
+
+      <div className="mt-8 w-full flex justify-center gap-4">
+        <Button
+          onClick={previousChangeStep}
+          disabled={loading}
+          className="bg-gradient-to-br from-blue-500 to-cyan-600"
+        >
+          <ChevronLeft size={18} /> Voltar
+        </Button>
+        {!loading && (
+          <Button
+            onClick={downloadMergedImage}
+            className="bg-gradient-to-br from-blue-500 to-cyan-600"
+          >
+            Baixar Imagem <Download size={18} />
+          </Button>
+        )}
+        {loading && (
+          <Button className="bg-gradient-to-br from-blue-500 to-cyan-600 w-24">
+            <Loading />
+          </Button>
+        )}
+      </div>
       <div></div>
     </div>
   );
