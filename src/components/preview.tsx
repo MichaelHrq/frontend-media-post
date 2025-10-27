@@ -1,10 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
-import { configType, newsType, selectType, stepType } from "@/app/type";
+import {
+  componentsType,
+  configType,
+  newsType,
+  selectType,
+  stepType,
+} from "@/app/type";
 import { Button } from "@/components/ui/button";
 import { track } from "@vercel/analytics/react";
 import html2canvas from "html2canvas-pro";
 import { ChevronLeft, Download } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createElement, useEffect, useMemo, useRef, useState } from "react";
 import Loading from "./loading";
 
 interface PropsType {
@@ -130,6 +136,44 @@ export default function Preview({
     }
   };
 
+  const contentMap: { [key: string]: { value: string; setter: (value: string) => void } } = {
+    chapeu: { value: chapeu, setter: setChapeu },
+    title: { value: title, setter: setTitle },
+    description: { value: description, setter: setDescription },
+    url: { value: url, setter: setUrl },
+  };
+
+  const renderComponent = (component: componentsType): React.ReactElement => {
+    const { element, editable, className, children, id } = component;
+    const contentKey = Object.keys(contentMap).find((key) => id.includes(key));
+
+    const props: React.HTMLAttributes<HTMLElement> & { key: string } = {
+      key: id,
+      className: className,
+    };
+
+    const hasChildren = children && children.length > 0;
+
+    if (contentKey && contentMap[contentKey] && !hasChildren) {
+      const { value, setter } = contentMap[contentKey];
+      props.dangerouslySetInnerHTML = { __html: value };
+
+      if (editable) {
+        props.contentEditable = true;
+        props.suppressContentEditableWarning = true;
+        props.onBlur = (e: React.FocusEvent<HTMLElement>) => {
+          setter(e.currentTarget.innerHTML);
+        };
+      }
+    }
+
+    return createElement(
+      element,
+      props,
+      hasChildren ? children.map(renderComponent) : null
+    );
+  };
+  
   if (!config || !newsData) {
     return (
       <div className="px-4 py-2 max-w-5xl mx-auto text-center">
@@ -145,6 +189,7 @@ export default function Preview({
       <div className="w-full flex justify-center">
         <div
           ref={postPreviewRef}
+          id="post-preview"
           className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
           style={{
             backgroundImage: `url(${croppedImage})`,
@@ -157,126 +202,9 @@ export default function Preview({
             alt="Moldura do post"
             className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
           />
-          {select?.template?.styles?.chapeu && (
-            <div className={select.template.styles.chapeu.div}>
-              <p
-                contentEditable
-                suppressContentEditableWarning={true}
-                onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{
-                  __html: chapeu,
-                }}
-                // ref={(element) =>
-                //   adjustFontSize(
-                //     element,
-                //     select.template?.styles.chapeu?.p.fontSize
-                //   )
-                // }
-                className={select.template.styles.chapeu.p}
-              />
-            </div>
-          )}
-          {select?.template?.styles?.title && (
-            <div className={select.template.styles.title.div}>
-              <h2
-                contentEditable
-                suppressContentEditableWarning={true}
-                onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{ __html: title }}
-                className={select.template.styles.title.h2}
-              />
-
-              {select?.template?.styles?.description && (
-                <p
-                  contentEditable
-                  suppressContentEditableWarning={true}
-                  onBlur={(e) => setDescription(e.currentTarget.innerHTML)}
-                  dangerouslySetInnerHTML={{ __html: description }}
-                  className={select.template.styles.description.p}
-                />
-              )}
-            </div>
-          )}
-
-          {select?.template?.styles?.url && (
-            <div className={select.template.styles.url.div}>
-              <p
-                contentEditable
-                suppressContentEditableWarning={true}
-                dangerouslySetInnerHTML={{ __html: url }}
-                className={select.template.styles.url.p}
-              />
-            </div>
-          )}
+          {select.template?.components?.map(renderComponent)}
         </div>
       </div>
-
-      {/* <div className="w-full flex justify-center">
-        <div
-          ref={postPreviewRef}
-          className="relative h-[600px] max rounded bg-cover bg-center overflow-hidden"
-          style={{
-            backgroundImage: `url(${croppedImage})`,
-            aspectRatio: `${config.width} / ${config.height}`,
-            backgroundColor: "transparent",
-          }}
-        >
-          <img
-            src={select.template?.src}
-            alt="Moldura do post"
-            className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none"
-          />
-          {select?.template?.styles?.chapeu && (
-            <div className={select.template.styles.chapeu.div}>
-              <p
-                contentEditable
-                suppressContentEditableWarning={true}
-                onBlur={(e) => setChapeu(e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{
-                  __html: chapeu,
-                }}
-                // ref={(element) =>
-                //   adjustFontSize(
-                //     element,
-                //     select.template?.styles.chapeu?.p.fontSize
-                //   )
-                // }
-                className={select.template.styles.chapeu.p}
-              />
-            </div>
-          )}
-          {select?.template?.styles?.title && (
-            <div className={select.template.styles.title.div}>
-              <h2
-                contentEditable
-                suppressContentEditableWarning={true}
-                onBlur={(e) => setTitle(e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{ __html: title }}
-                className={select.template.styles.title.h2}
-              />
-
-              {select?.template?.styles?.description && (
-                <p
-                  contentEditable
-                  suppressContentEditableWarning={true}
-                  onBlur={(e) => setDescription(e.currentTarget.innerHTML)}
-                  dangerouslySetInnerHTML={{ __html: description }}
-                  className="text-xs text-white font-inter font-semibold [text-shadow:2px_2px_10px_#000,-2px_-2px_10px_#000,2px_-2px_10px_#000,-2px_2px_10px_#000]"
-                />
-              )}
-            </div>
-          )}
-
-          {select?.template?.styles?.url && (
-            <div className={select.template.styles.url.div}>
-              <p
-                dangerouslySetInnerHTML={{ __html: url }}
-                className="text-xs absolute z-20 bottom-5 left-[5%] text-white font-inter font-bold [text-shadow:2px_2px_10px_#000,-2px_-2px_10px_#000,2px_-2px_10px_#000,-2px_2px_10px_#000] after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-20 after:h-[3px] after:bg-[#5a0808]"
-              />
-            </div>
-          )}
-        </div>
-      </div> */}
 
       <div className="mt-8 w-full flex justify-center gap-4">
         <Button

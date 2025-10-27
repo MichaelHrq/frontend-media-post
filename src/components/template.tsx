@@ -57,7 +57,8 @@ export default function Template({
                 : "hover:shadow-md"
             }`}
           >
-            <CardContent className="flex justify-center">
+            <CardContent className="flex justify-center flex-col">
+              <h2 className="font-semibold text-gray-800 text-center mb-2">{item.name}</h2>
               <img
                 src={item.src}
                 alt="Template"

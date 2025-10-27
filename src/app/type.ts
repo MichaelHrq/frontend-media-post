@@ -24,12 +24,19 @@ export type masksType = {
   [key: string]: maskItemType[];
 };
 
+export type componentsType = {
+  id: string;
+  element: string;
+  editable: boolean;
+  className: string;
+  children: componentsType[];
+};
+
 export type templateItemType = {
   id: number;
   src: string;
-  styles: {
-    [key: string]: { [key: string]: string };
-  };
+  name: string;
+  components: componentsType[];
 };
 
 export type templateType = {
@@ -63,5 +70,5 @@ export type selectType = {
   modelo: configType | null;
   template: templateItemType | null;
   news: string | undefined;
-  mask: maskItemType | undefined
+  mask: maskItemType | undefined;
 };
