@@ -1,15 +1,17 @@
 import { configType, newsType, selectType, stepType } from "@/app/type";
+import { ChevronLeft, RotateCcw, Scissors, Upload } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
-import { Button } from "./ui/button";
-import { ChevronLeft, Scissors } from "lucide-react";
 import Loading from "./loading";
+import { Button } from "./ui/button";
 
 interface CroppingProps {
   next: stepType;
@@ -34,10 +36,11 @@ export async function getCroppedImg(
   pixelCrop: Area,
   config: configType
 ): Promise<string | null> {
-  // 🔑 Usa o proxy do Next.js
-  const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(imageSrc)}`;
+  const imageSourceToUse = imageSrc.startsWith("data:")
+    ? imageSrc
+    : `/api/image-proxy?url=${encodeURIComponent(imageSrc)}`;
 
-  const image = await createImage(proxiedUrl);
+  const image = await createImage(imageSourceToUse);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -88,13 +91,15 @@ export default function Cropping({
   const [zoom, setZoom] = useState(1);
   const [loading, setLoading] = useState(false);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { config, newsData } = useMemo(() => {
     if (!select.modelo || !select.news) {
       return { config: null, newsData: null };
     }
     try {
-      const config = model.find(item=>item.id === select.modelo?.id)!
+      const config = model.find((item) => item.id === select.modelo?.id)!;
       const newsData: newsType = JSON.parse(select.news);
       return { config, newsData };
     } catch (error) {
@@ -102,6 +107,12 @@ export default function Cropping({
       return { config: null, newsData: null };
     }
   }, [select.modelo, select.news]);
+
+  useEffect(() => {
+    if (newsData?.image && !currentImage) {
+      setCurrentImage(newsData.image);
+    }
+  }, [newsData?.image, currentImage]);
 
   const onCropComplete = useCallback(
     (_croppedArea: Area, croppedAreaPixels: Area) => {
@@ -112,13 +123,13 @@ export default function Cropping({
 
   const applyCrop = useCallback(async () => {
     setLoading(true);
-    if (!croppedAreaPixels || !newsData?.image || !config) {
+    if (!croppedAreaPixels || !currentImage || !config) {
       console.warn("Dados necessários para o corte não estão disponíveis.");
       return;
     }
     try {
       const croppedImageUrl = await getCroppedImg(
-        newsData.image,
+        currentImage,
         croppedAreaPixels,
         config
       );
@@ -128,11 +139,28 @@ export default function Cropping({
     } catch (e) {
       console.error("Erro ao aplicar o corte:", e);
     }
-  }, [newsData, croppedAreaPixels, config]);
+  }, [currentImage, croppedAreaPixels, config, setCroppedImage, onChangeStep, next]);
 
   function previusChangeStep() {
     onChangeStep(previous);
   }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCurrentImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRevertToOriginal = () => {
+    if (newsData?.image) {
+      setCurrentImage(newsData.image);
+    }
+  };
 
   if (!config || !newsData) {
     return (
@@ -150,7 +178,7 @@ export default function Cropping({
 
       <div className="relative w-full h-96 bg-gray-200">
         <Cropper
-          image={newsData.image}
+          image={currentImage || ""}
           crop={crop}
           zoom={zoom}
           aspect={config.width / config.height}
@@ -175,6 +203,31 @@ export default function Cropping({
             onChange={(e) => setZoom(Number(e.target.value))}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
+        </div>
+
+        <div className="flex justify-center gap-2 mt-4">
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="mr-2 h-4 w-4" /> Alterar Imagem
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+            accept="image/*"
+          />
+          {currentImage !== newsData.image && (
+            <Button
+              variant="outline"
+              onClick={handleRevertToOriginal}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" /> 
+              Voltar para imagem original
+            </Button>
+          )}
         </div>
 
         <div className="mt-4 w-full flex justify-center gap-4">
