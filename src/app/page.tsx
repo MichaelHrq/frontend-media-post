@@ -6,6 +6,7 @@ import Preview from "@/components/preview";
 import Selection from "@/components/selection";
 import Template from "@/components/template";
 // import { cenariumMascaras } from "@/constants/mascaras/cenarium";
+import Footer from "@/components/footer";
 import { cenariumModel } from "@/constants/modelos/cenarium";
 import { emtempoModel } from "@/constants/modelos/emtempo";
 import { cenariumTemplate } from "@/constants/templates/cenarium";
@@ -71,29 +72,30 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex-col items-center justify-center">
-      {step === "model" && (
-        <ModelSelect
-          model={model}
-          next="template"
-          select={select}
-          setSelect={setSelect}
-          onChangeStep={onChangeStep}
-          // onSelectMasks={onSelectMasks}
-        />
-      )}
-      {step === "template" && (
-        <Template
-          previus="model"
-          select={select}
-          next={"selection"}
-          // next={masks ? "mask" : "selection"}
-          template={template}
-          setSelect={setSelect}
-          onChangeStep={onChangeStep}
-        />
-      )}
-      {/* {step === "mask" && masks && (
+    <>
+      <main className="min-h-[calc(100dvh-64px)] w-full flex-col items-center justify-center">
+        {step === "model" && (
+          <ModelSelect
+            model={model}
+            next="template"
+            select={select}
+            setSelect={setSelect}
+            onChangeStep={onChangeStep}
+            // onSelectMasks={onSelectMasks}
+          />
+        )}
+        {step === "template" && (
+          <Template
+            previus="model"
+            select={select}
+            next={"selection"}
+            // next={masks ? "mask" : "selection"}
+            template={template}
+            setSelect={setSelect}
+            onChangeStep={onChangeStep}
+          />
+        )}
+        {/* {step === "mask" && masks && (
         <Masks
           masks={masks}
           next="selection"
@@ -104,36 +106,39 @@ export default function Home() {
           setSelect={setSelect}
         />
       )} */}
-      {step === "selection" && select.modelo && (
-        <Selection
-          next="crop"
-          news={news}
-          select={select}
-          previus={"template"}
-          // previus={masks ? "mask" : "template"}
-          setSelect={setSelect}
-          onChangeStep={onChangeStep}
-        />
-      )}
-      {step === "crop" && select.modelo && (
-        <Cropping
-          model={model}
-          next="preview"
-          select={select}
-          previous="selection"
-          onChangeStep={onChangeStep}
-          setCroppedImage={setCroppedImage}
-        />
-      )}
-      {step === "preview" && select.modelo && (
-        <Preview
-          model={model}
-          previous="crop"
-          select={select}
-          croppedImage={croppedImage!}
-          onChangeStep={onChangeStep}
-        />
-      )}
-    </main>
+        {step === "selection" && select.modelo && (
+          <Selection
+            next="crop"
+            news={news}
+            select={select}
+            previus={"template"}
+            // previus={masks ? "mask" : "template"}
+            setSelect={setSelect}
+            onChangeStep={onChangeStep}
+          />
+        )}
+        {step === "crop" && select.modelo && (
+          <Cropping
+            model={model}
+            next="preview"
+            select={select}
+            previous="selection"
+            onChangeStep={onChangeStep}
+            setCroppedImage={setCroppedImage}
+          />
+        )}
+        {step === "preview" && select.modelo && (
+          <Preview
+            model={model}
+            previous="crop"
+            select={select}
+            croppedImage={croppedImage!}
+            onChangeStep={onChangeStep}
+          />
+        )}
+      </main>
+
+      <Footer />
+    </>
   );
 }
